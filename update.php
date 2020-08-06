@@ -11,6 +11,7 @@
     <body>
     <div class="container">
         <?php
+          include 'config.php';
             function test_input($data) {
                 $data = trim($data);
                 $data = stripslashes($data);
@@ -21,22 +22,18 @@
             $player_id = $player_name = $age = $salary = $team = $country = "";
 
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                if(isset($_REQUEST['btn_update'])){
-                    echo "hello update<br>";
-                }
-                echo "hello<br>";
-                $player_id = test_input($_POST["player_id"]);
-                $player_name = test_input($_REQUEST["player_name"]);
-                $age = test_input($_POST["age"]);
-                $salary = test_input($_POST["salary"]);
-                $team = test_input($_POST["team"]);
-                $country = test_input($_POST["country"]);
-                include 'config.php';
-                $sql = "UPDATE PLAYER SET player_name=$player_name, age=$age, salary=$salary, team_id=$team, country_id=$country
-                        WHERE id=$player_id;";
+                $player_id = test_input($_REQUEST["player_id"]);
+                $input_player_name = test_input($_REQUEST["input_player_name"]);
+                $age = test_input($_REQUEST["age"]);
+                $salary = test_input($_REQUEST["salary"]);
+                $team = test_input($_REQUEST["team"]);
+                $country = test_input($_REQUEST["country"]);
+               
+                $sql = "UPDATE PLAYER SET player_name='$input_player_name', age=$age, salary=$salary, team_id=$team, country_id=$country WHERE id=$player_id;";
             
                 if ($conn->query($sql) === TRUE) {
                     echo "Update successfully";
+                    header("location:player_list.php");
                 }
                 else {
                     echo "Error updating table records: " . $conn->error;
@@ -51,7 +48,9 @@
         <h3>Update Player</h3>
         <form action="<?php echo $_SERVER['PHP_SELF']?>" method="POST">
             <?php
-                    include 'config.php';
+                  
+                    if ($_SERVER["REQUEST_METHOD"] == "GET") {
+                    $player_id = test_input($_REQUEST["btn-update"]);                     
                     $sql = "SELECT p.country_id, p.team_id, p.id, p.player_name, p.age, p.salary, team.team_name, country.country_name
                             FROM player p, team, country 
                             WHERE p.id=$player_id AND p.team_id=team.id AND p.country_id=country.id;";
@@ -60,11 +59,12 @@
                     $country_id = $row['country_id'];
                     echo "<input type='hidden' name='player_id' value={$row['id']}>";
                     $conn->close();
+                    }
             ?>
             <table class="table">
                 <tr>
                     <td>Name</td>
-                    <td><input type="text" name="player_name" value="<?php echo $row['player_name']?>"> </td>
+                    <td><input type="text" name="input_player_name" value="<?php echo $row['player_name']?>"> </td>
                 </tr>
                 <tr>
                     <td>Age</td>

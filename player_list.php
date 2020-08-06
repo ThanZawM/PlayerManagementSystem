@@ -1,3 +1,14 @@
+<?php
+// Initialize the session
+session_start();
+ 
+// Check if the user is already logged in, if yes then redirect him to welcome page
+if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
+    header("location: login.php");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -19,47 +30,92 @@
               return $data;
           }
 
-            if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                include 'config.php';
-                $player_id = test_input($_POST["player_id"]);
-                $sql = "DELETE FROM player WHERE $player_id=id";
-            
-                if ($conn->query($sql) === TRUE) {
-                echo "Deleted successfully";
-                }
-                else {
-                echo "Error deleting table records: " . $conn->error;
-                }
-                $conn->close(); 
+            if ($_SERVER["REQUEST_METHOD"] == "GET") {
+                if(isset($_REQUEST["player_id"])){
+                          include 'config.php';
+                          $player_id = test_input($_REQUEST["player_id"]);
+                          $sql = "DELETE FROM player WHERE $player_id=id";
+                      
+                          if ($conn->query($sql) === TRUE) {
+                            echo "Deleted successfully";
+                          }
+                          else {
+                            echo "Error deleting table records: " . $conn->error;
+                          }
+                          $conn->close(); 
+                      }
             }
           ?>
           <div class="container">
             <br>
             <h3>Player Information</h3>
             <br>
+            <form action="#" method="GET">
+            <select name="selected_team_id">
+                            <?php
+                            include 'config.php';
+                            $sql = "SELECT * FROM team;";
+                            $result = $conn->query($sql);
+                            if($result->num_rows > 0){
+                                    //echo "<option value='select_team'>Select Team</option>";
+                                    while($row = $result->fetch_assoc()){
+                                      echo "<option value='" . $row['id'] ."'>" . $row['team_name']."</option>";
+                                    }
+                                }
+                                else{
+                                    echo "0 results.";
+                                }
+                                $conn->close();
+                            ?>
+              </select>
+              <input type="search" name="search_item" placeholder="Search player...">&nbsp;&nbsp;
+              <button type="submit" name="btn_search" class="btn btn-outline-info">Search</button>
+              <?php
+              for($i=0; $i<124; $i++){
+                echo "&nbsp";
+              }
+              ?>
+              <button type="submit" class="btn btn-primary" formaction="new_player.php">Add New Player</button>
+            </form>
+            <br><br>
             <table class="table table-striped">
             <tr>
-              <th>Name</th><th>Age</th><th>Salary</th><th>Team</th><th>Country</th><th>Edit</th><th>Delete</th>
+              <th>No</th><th>Name</th><th>Age</th><th>Salary</th><th>Team</th><th>Country</th><th>Edit</th><th>Delete</th>
             </tr>
             <?php
                   include 'config.php';
-                  $sql = "SELECT player.id, player.player_name, player.age, player.salary, team.team_name, country.country_name 
-                          FROM player, team, country
-                          WHERE player.team_id=team.id AND player.country_id=country.id;";
-
+                  if(isset($_REQUEST['selected_team_id']) && $_REQUEST['search_item']==""){
+                        $selected_team_id = $_REQUEST['selected_team_id'];
+                        $sql = "SELECT p.id, p.player_name, p.age, p.salary, t.team_name, c.country_name 
+                            FROM player p, team t, country c
+                            WHERE p.team_id=$selected_team_id AND p.team_id=t.id AND p.country_id=c.id;";
+                  }
+                  elseif(isset($_REQUEST['selected_team_id']) && isset($_REQUEST['search_item'])){
+                      $search_item = $_REQUEST['search_item'];
+                      $selected_team_id = $_REQUEST['selected_team_id'];
+                      $sql = "SELECT p.id, p.player_name, p.age, p.salary, t.team_name, c.country_name 
+                          FROM player p, team t, country c
+                          WHERE p.team_id=$selected_team_id AND p.player_name LIKE '$search_item%' AND p.team_id=t.id AND p.country_id=c.id;";
+                  }
+                  else{
+                    $sql = "SELECT p.id, p.player_name, p.age, p.salary, t.team_name, c.country_name 
+                          FROM player p, team t, country c
+                          WHERE p.team_id=t.id AND p.country_id=c.id;";
+                  }
                   $result = $conn->query($sql);
 
                   if ($result->num_rows > 0) {
-                    
+                    $i=0;
                     while($row = $result->fetch_assoc()){
-                        echo "<form action='#' method='post'>";
+                      $i++;
+                        echo "<form action='#' method='GET'>";
                         echo "<tr>";
-                        echo "<td>{$row['player_name']}</td><td>{$row['age']}</td><td>{$row['salary']}</td><td>{$row['team_name']}</td>".
+                        echo "<td>{$i}</td><td>{$row['player_name']}</td><td>{$row['age']}</td><td>{$row['salary']}</td><td>{$row['team_name']}</td>".
                         "<td>{$row['country_name']}</td>".
+                        //"<td><input type='hidden' name='player_id' value={$row['id']}>".
+                        "<td><button type='submit' class='btn btn-success' name='btn-update' value={$row['id']} formaction='update.php'>Update</button></td>".
                         "<td><input type='hidden' name='player_id' value={$row['id']}>".
-                        "<button type='submit' class='btn btn-success' name='btn-update' id='btn-update' formaction='update.php' value={$row['id']}>Update</button></td>".
-                        "<td><input type='hidden' name='player_id' value={$row['id']}>".
-                        "<button type='submit' class='btn btn-danger' name='btn-delete' id='btn-delete' formaction={$_SERVER['PHP_SELF']}>Delete</button></td>";
+                        "<button type='submit' class='btn btn-danger' name='btn-delete' onClick=\"javascript: return confirm('Are you sure you want to delete?');\"  formaction={$_SERVER['PHP_SELF']}>Delete</button></td>";
                         echo "</tr>";
                         echo "</form>";
                     }

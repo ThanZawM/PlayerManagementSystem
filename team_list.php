@@ -9,7 +9,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
 }
 ?>
 
-<!DOCTYPE html>
+<DOCTYPE html>
 <html>
     <head>
     <meta charset="utf-8">
@@ -27,28 +27,39 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
       <br>
       
       <div class="container">
-      <h3>Players Transfer History</h3>
+      <h3><em>Players Transfer History</em></h3>
       <br>
-    <table class="table table-striped">
+    <table class="table">
     <tr>
-        <th>Player</th><th>From_Team</th><th>To_Team</th><th>Date</th><th>Transfer_Fee</th>
+        <th>Team</th><th>Number of Player</th><th></th>
     </tr>
     <?php
         include 'config.php';
         if ($conn->connect_error) {
             die("Connection failed: " . $conn->connect_error);
         }
-        $sql = "SELECT p.player_name, th.transfer_fee,from_team.team_name AS FromTeam, to_team.team_name AS ToTeam,th.date 
-            FROM TRANSFER_HISTORY th LEFT JOIN TEAM from_team ON th.from_team_id=from_team.id 
-            LEFT JOIN PLAYER p ON th.player_id=p.id LEFT JOIN TEAM to_team ON th.to_team_id=to_team.id;";
-
+       $sql="SELECT t.team_name,count(p.team_id) AS cnt FROM team t , player p WHERE p.team_id=1 and p.team_id=t.id;";
         $result = $conn->query($sql);
 
-        if ($result->num_rows > 0) {
-        
+        if ($result->num_rows > 0){
             while($row = $result->fetch_assoc()){
                 echo "<tr>";
-                echo "<td>{$row['player_name']}</td><td>{$row['FromTeam']}</td><td>{$row['ToTeam']}</td><td>{$row['date']}</td><td>{$row['transfer_fee']}</td>";
+                echo "<td>{$row['team_name']}</td><td>{$row['cnt']} </td><td><a href='view_player.php'><button>View Player</button></a></td>";
+               
+                echo "</tr>";
+            }
+        }
+        else {
+            echo "";
+        }
+        $sql1="SELECT t.team_name,count(p.team_id) AS cnt FROM team t , player p WHERE p.team_id=2 and p.team_id=t.id;";
+        $result1 = $conn->query($sql1);
+
+        if ($result1->num_rows > 0){
+            while($row1 = $result1->fetch_assoc()){
+                echo "<tr>";
+                echo "<td>{$row1['team_name']}</td><td>{$row1['cnt']} </td><td><a href='view_player2.php'><button>View Player</button></a></td>";
+               
                 echo "</tr>";
             }
         }
@@ -56,8 +67,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
             echo "";
         }
         $conn->close();
-?>
-
+?>        
     </table>
     </div>
     </body>

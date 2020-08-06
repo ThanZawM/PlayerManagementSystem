@@ -42,7 +42,7 @@
     <?php 
     include 'menu.html';
     ?>
-<br>    
+<br>
 <h3>Add New Player</h3>
 <form method="post" action="<?php $_SERVER['PHP_SELF'] ?>">
 <table class="table">

@@ -30,6 +30,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
               return $data;
           }
 
+          //For deleting table records
             if ($_SERVER["REQUEST_METHOD"] == "GET") {
                 if(isset($_REQUEST["player_id"])){
                           include 'config.php';
@@ -57,7 +58,6 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
                             $sql = "SELECT * FROM team;";
                             $result = $conn->query($sql);
                             if($result->num_rows > 0){
-                                    //echo "<option value='select_team'>Select Team</option>";
                                     while($row = $result->fetch_assoc()){
                                       echo "<option value='" . $row['id'] ."'>" . $row['team_name']."</option>";
                                     }
@@ -80,25 +80,25 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
             <br><br>
             <table class="table table-striped">
             <tr>
-              <th>No</th><th>Name</th><th>Age</th><th>Salary</th><th>Team</th><th>Country</th><th>Edit</th><th>Delete</th>
+              <th>No</th><th>Name</th><th>Photo</th><th>Age</th><th>Salary</th><th>Team</th><th>Country</th><th>Details</th><th>Edit</th><th>Delete</th>
             </tr>
             <?php
                   include 'config.php';
                   if(isset($_REQUEST['selected_team_id']) && $_REQUEST['search_item']==""){
                         $selected_team_id = $_REQUEST['selected_team_id'];
-                        $sql = "SELECT p.id, p.player_name, p.age, p.salary, t.team_name, c.country_name 
+                        $sql = "SELECT p.id, p.player_name, p.image_path, p.age, p.salary, t.team_name, c.country_name 
                             FROM player p, team t, country c
                             WHERE p.team_id=$selected_team_id AND p.team_id=t.id AND p.country_id=c.id;";
                   }
                   elseif(isset($_REQUEST['selected_team_id']) && isset($_REQUEST['search_item'])){
                       $search_item = $_REQUEST['search_item'];
                       $selected_team_id = $_REQUEST['selected_team_id'];
-                      $sql = "SELECT p.id, p.player_name, p.age, p.salary, t.team_name, c.country_name 
+                      $sql = "SELECT p.id, p.player_name, p.image_path, p.age, p.salary, t.team_name, c.country_name 
                           FROM player p, team t, country c
                           WHERE p.team_id=$selected_team_id AND p.player_name LIKE '$search_item%' AND p.team_id=t.id AND p.country_id=c.id;";
                   }
                   else{
-                    $sql = "SELECT p.id, p.player_name, p.age, p.salary, t.team_name, c.country_name 
+                    $sql = "SELECT p.id, p.player_name, p.image_path, p.age, p.salary, t.team_name, c.country_name 
                           FROM player p, team t, country c
                           WHERE p.team_id=t.id AND p.country_id=c.id;";
                   }
@@ -110,9 +110,11 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
                       $i++;
                         echo "<form action='#' method='GET'>";
                         echo "<tr>";
-                        echo "<td>{$i}</td><td>{$row['player_name']}</td><td>{$row['age']}</td><td>{$row['salary']}</td><td>{$row['team_name']}</td>".
+                        echo "<td>{$i}</td><td>{$row['player_name']}</td>".
+                        "<td><img width='50' height='50' src='images/".$row['image_path']."'></td>".
+                        "<td>{$row['age']}</td><td>{$row['salary']}</td><td>{$row['team_name']}</td>".
                         "<td>{$row['country_name']}</td>".
-                        //"<td><input type='hidden' name='player_id' value={$row['id']}>".
+                        "<td><button type='submit' class='btn btn-info' name='btn_details' value={$row['id']} formaction='player_details.php'>Details</button></td>".
                         "<td><button type='submit' class='btn btn-success' name='btn-update' value={$row['id']} formaction='update.php'>Update</button></td>".
                         "<td><input type='hidden' name='player_id' value={$row['id']}>".
                         "<button type='submit' class='btn btn-danger' name='btn-delete' onClick=\"javascript: return confirm('Are you sure you want to delete?');\"  formaction={$_SERVER['PHP_SELF']}>Delete</button></td>";

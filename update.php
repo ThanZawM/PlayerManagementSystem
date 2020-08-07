@@ -11,7 +11,7 @@
     <body>
     <div class="container">
         <?php
-          include 'config.php';
+            include 'config.php';
             function test_input($data) {
                 $data = trim($data);
                 $data = stripslashes($data);
@@ -19,9 +19,59 @@
                 return $data;
             }
 
-            $player_id = $player_name = $age = $salary = $team = $country = "";
+            function uploadFile($fileName){
+                $target_dir = "images/";
+                $target_file = $target_dir . basename($_FILES[$fileName]["name"]);
+                $uploadOk = 1;
+                $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+    
+                $check = getimagesize($_FILES[$fileName]["tmp_name"]);
+                if($check !== false) {
+                    echo "File is an image - " . $check["mime"] . ".";
+                    $uploadOk = 1;
+                } 
+                else {
+                    echo "File is not an image.";
+                    $uploadOk = 0;
+                }
+                // Check if file already exists
+                if (file_exists($target_file)) {
+                    echo "Sorry, file already exists.";
+                    $uploadOk = 0;
+                }
+    
+                // Check file size
+                if ($_FILES[$fileName]["size"] > 500000) {
+                    echo "Sorry, your file is too large.";
+                    $uploadOk = 0;
+                }
+    
+                // Allow certain file formats
+                if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ) {
+                    echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+                    $uploadOk = 0;
+                }
+    
+                // Check if $uploadOk is set to 0 by an error
+                if ($uploadOk == 0) {
+                    echo "Sorry, your file was not uploaded.";
+                    // if everything is ok, try to upload file
+                } 
+                else {
+                    if (move_uploaded_file($_FILES[$fileName]["tmp_name"], $target_file)) {
+                        //echo "The file ". basename( $_FILES["photo"]["name"]). " has been uploaded.";
+                        return $_FILES[$fileName]["name"];
+                    } else {
+                        echo "Sorry, there was an error uploading your file.";
+                    }
+                }
+            }
+
+            $player_id = $player_name = $photo = $age = $salary = $team = $country = "";
 
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                //include 'config.php';
+                $photo = uploadFile("photo");
                 $player_id = test_input($_REQUEST["player_id"]);
                 $input_player_name = test_input($_REQUEST["input_player_name"]);
                 $age = test_input($_REQUEST["age"]);
@@ -29,11 +79,11 @@
                 $team = test_input($_REQUEST["team"]);
                 $country = test_input($_REQUEST["country"]);
                
-                $sql = "UPDATE PLAYER SET player_name='$input_player_name', age=$age, salary=$salary, team_id=$team, country_id=$country WHERE id=$player_id;";
+                $sql = "UPDATE player SET player_name='$input_player_name', image_path='$photo', age=$age, salary=$salary, team_id=$team, country_id=$country WHERE id=$player_id;";
             
                 if ($conn->query($sql) === TRUE) {
                     echo "Update successfully";
-                    header("location:player_list.php");
+                    header("location: player_list.php");
                 }
                 else {
                     echo "Error updating table records: " . $conn->error;
@@ -46,12 +96,11 @@
         ?>
         <br>
         <h3>Update Player</h3>
-        <form action="<?php echo $_SERVER['PHP_SELF']?>" method="POST">
+        <form action="<?php echo $_SERVER['PHP_SELF']?>" method="POST" enctype="multipart/form-data">
             <?php
-                  
                     if ($_SERVER["REQUEST_METHOD"] == "GET") {
                     $player_id = test_input($_REQUEST["btn-update"]);                     
-                    $sql = "SELECT p.country_id, p.team_id, p.id, p.player_name, p.age, p.salary, team.team_name, country.country_name
+                    $sql = "SELECT p.country_id, p.team_id, p.id, p.player_name, p.image_path, p.age, p.salary, team.team_name, country.country_name
                             FROM player p, team, country 
                             WHERE p.id=$player_id AND p.team_id=team.id AND p.country_id=country.id;";
                     $result = $conn->query($sql);
@@ -64,7 +113,11 @@
             <table class="table">
                 <tr>
                     <td>Name</td>
-                    <td><input type="text" name="input_player_name" value="<?php echo $row['player_name']?>"> </td>
+                    <td><input type="text" name="input_player_name" value="<?php echo $row['player_name']?>"></td>
+                </tr>
+                <tr>
+                    <td>Photo</td>
+                    <td><img width='50' height='50' src="images/{$row['image_path']}"><input type="file" class="form-control" id="photo"  name="photo" ></td>
                 </tr>
                 <tr>
                     <td>Age</td>
@@ -72,7 +125,7 @@
                 </tr>
                 <tr>
                     <td>Salary</td><br>
-                    <td><input name="salary" type="number" value="<?php echo $row['salary']?>"> </td>
+                    <td><input name="salary" type="number" value="<?php echo $row['salary']?>"></td>
                 </tr>
                 <tr>
                     <td>Team</td><br>

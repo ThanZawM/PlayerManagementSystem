@@ -150,7 +150,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
                 <td><input type='number' name='transfer_fee'></td>
             </tr>
             <tr>
-                <td colspan="2"><button type="submit" class="btn btn-primary">Add</button></td>   
+                <td colspan="2"><button type="submit" class="btn btn-primary">Transfer</button></td>   
             </tr>
         </table>
     </form>

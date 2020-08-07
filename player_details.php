@@ -1,14 +1,3 @@
-<?php
-// Initialize the session
-session_start();
- 
-// Check if the user is already logged in, if yes then redirect him to welcome page
-if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
-    header("location: login.php");
-    exit;
-}
-?>
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -27,7 +16,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
       <br>
       
       <div class="container">
-      <h3>Players Transfer History</h3>
+      <h3>Players Details</h3>
       <br>
     <table class="table table-striped">
     <tr>
@@ -35,12 +24,13 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
     </tr>
     <?php
         include 'config.php';
+        $player_id = $_REQUEST['btn_details'];
         if ($conn->connect_error) {
             die("Connection failed: " . $conn->connect_error);
         }
         $sql = "SELECT p.player_name, th.transfer_fee,from_team.team_name AS FromTeam, to_team.team_name AS ToTeam,th.date 
             FROM TRANSFER_HISTORY th LEFT JOIN TEAM from_team ON th.from_team_id=from_team.id 
-            LEFT JOIN PLAYER p ON th.player_id=p.id LEFT JOIN TEAM to_team ON th.to_team_id=to_team.id;";
+            INNER JOIN PLAYER p ON th.player_id=p.id and th.player_id=$player_id LEFT JOIN TEAM to_team ON th.to_team_id=to_team.id;";
 
         $result = $conn->query($sql);
 

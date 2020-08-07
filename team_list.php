@@ -27,7 +27,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
       <br>
       
       <div class="container">
-      <h3><em>Players Transfer History</em></h3>
+      <h3>Team Information</h3>
       <br>
     <table class="table">
     <tr>

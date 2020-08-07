@@ -106,6 +106,8 @@
                     $result = $conn->query($sql);
                     $row = $result->fetch_assoc();
                     $country_id = $row['country_id'];
+                    $imgpath = $row['image_path'];
+                    //echo $imgpath;
                     echo "<input type='hidden' name='player_id' value={$row['id']}>";
                     $conn->close();
                     }
@@ -117,7 +119,8 @@
                 </tr>
                 <tr>
                     <td>Photo</td>
-                    <td><img width='50' height='50' src="images/{$row['image_path']}"><input type="file" class="form-control" id="photo"  name="photo" ></td>
+                    <td><img width='50' height='50' src='images/<?php echo $imgpath ?>'>
+                    <input type="file" name="photo" class="form-control" value="<?php echo $imgpath; ?>"></td>
                 </tr>
                 <tr>
                     <td>Age</td>

@@ -1,5 +1,7 @@
 # PlayerManagementSystem
 
+## Sample usage
+
 1. Xampp
 
 2. Copy all files from the PlayerManagementSystem repository.
